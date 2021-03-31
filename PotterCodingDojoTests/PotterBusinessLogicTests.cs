@@ -45,7 +45,7 @@ namespace PotterCodingDojoTests
             decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
 
             //Assert
-            Assert.AreEqual( 15.20M, bestPriceCalculated, "Incorrect price calculated for a single book" );
+            Assert.AreEqual( 15.20M, bestPriceCalculated, "Incorrect price calculated for 2 different books" );
 
         }
 
@@ -64,7 +64,7 @@ namespace PotterCodingDojoTests
             decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
 
             //Assert
-            Assert.AreEqual( 21.60M, bestPriceCalculated, "Incorrect price calculated for a single book" );
+            Assert.AreEqual( 21.60M, bestPriceCalculated, "Incorrect price calculated for three different books" );
 
         }
 
@@ -84,7 +84,7 @@ namespace PotterCodingDojoTests
             decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
 
             //Assert
-            Assert.AreEqual( 25.60M, bestPriceCalculated, "Incorrect price calculated for a single book" );
+            Assert.AreEqual( 25.60M, bestPriceCalculated, "Incorrect price calculated for four different books" );
 
         }
 
@@ -105,10 +105,28 @@ namespace PotterCodingDojoTests
             decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
 
             //Assert
-            Assert.AreEqual( 30.0M, bestPriceCalculated, "Incorrect price calculated for a single book" );
+            Assert.AreEqual( 30.0M, bestPriceCalculated, "Incorrect price calculated for five different books" );
 
         }
 
+
+        [TestMethod]
+        public async Task CalculateBestPrice_TwoSameBooks_NoDiscount()
+        {
+            //Arrange
+            var systemUnderTest = CreateSystemUnderTest();
+            List<BookInBasket> testData = new List<BookInBasket> {
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" }
+            };
+
+            //Act
+            decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
+
+            //Assert
+            Assert.AreEqual( 16.0M, bestPriceCalculated, "Incorrect price calculated for 2 of the same book" );
+
+        }
         private PotterBusinessLogic CreateSystemUnderTest()
         {
             var systemUnderTest = new PotterBusinessLogic();
