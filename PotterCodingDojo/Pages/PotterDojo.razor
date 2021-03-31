@@ -1,0 +1,16 @@
+﻿@page "/PotterDojo"
+
+<h1>Potter Coding Dojo</h1>
+
+<p>Number of books in basked: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
