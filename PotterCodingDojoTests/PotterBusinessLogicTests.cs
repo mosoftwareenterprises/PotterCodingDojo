@@ -111,6 +111,90 @@ namespace PotterCodingDojoTests
 
 
         [TestMethod]
+        public async Task CalculateBestPrice_1Normal2Discounted_DiscountAppliedToTwoBooks()
+        {
+            //Arrange
+            var systemUnderTest = CreateSystemUnderTest();
+            List<BookInBasket> testData = new List<BookInBasket> {
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" }
+            };
+
+            //Act
+            decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
+
+            //Assert
+            Assert.AreEqual( 23.2M, bestPriceCalculated, "Incorrect price calculated for five different books" );
+
+        }
+
+        [TestMethod]
+        public async Task CalculateBestPrice_TwoSets_TwoSetsOfDiscounts()
+        {
+            //Arrange
+            var systemUnderTest = CreateSystemUnderTest();
+            List<BookInBasket> testData = new List<BookInBasket> {
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" }
+            };
+
+            //Act
+            decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
+
+            //Assert
+            Assert.AreEqual( 30.4M, bestPriceCalculated, "Incorrect price calculated for five different books" );
+
+        }
+
+        [TestMethod]
+        public async Task CalculateBestPrice_FiveBooks_TwoDiffDiscounts()
+        {
+            //Arrange
+            var systemUnderTest = CreateSystemUnderTest();
+            List<BookInBasket> testData = new List<BookInBasket> {
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 3, Title = "Prisoner of Azkaban" },
+                new BookInBasket { Id = 3, Title = "Prisoner of Azkaban" },
+                new BookInBasket { Id = 4, Title = "Goblet of Fire" }
+            };
+
+            //Act
+            decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
+
+            //Assert
+            Assert.AreEqual( (8M * 4M * 0.8M) + (8M * 2M * 0.95M), bestPriceCalculated, "Incorrect price calculated for five different books" );
+
+        }
+
+        [TestMethod]
+        public async Task CalculateBestPrice_1NotDiscountedFiveAre_FiveDiscounted()
+        {
+            //Arrange
+            var systemUnderTest = CreateSystemUnderTest();
+            List<BookInBasket> testData = new List<BookInBasket> {
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 3, Title = "Prisoner of Azkaban" },
+                new BookInBasket { Id = 4, Title = "Goblet of Fire" },
+                new BookInBasket { Id = 5, Title = "Order of the Phoenix" }
+            };
+
+            //Act
+            decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
+
+            //Assert
+            Assert.AreEqual( 8M + (8M * 5M * 0.75M), bestPriceCalculated, "Incorrect price calculated for five different books" );
+
+        }
+
+
+
         [TestMethod]
         public async Task CalculateBestPrice_TwoSameBooks_NoDiscount()
         {
@@ -191,6 +275,77 @@ namespace PotterCodingDojoTests
             Assert.AreEqual( 40.0M, bestPriceCalculated, "Incorrect price calculated for 5 of the same book" );
 
         }
+
+        [TestMethod]
+        public async Task CalculateBestPrice_ComplexBasket_MultipleDiscountsApplied()
+        {
+            //Arrange
+            var systemUnderTest = CreateSystemUnderTest();
+            List<BookInBasket> testData = new List<BookInBasket> {
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 3, Title = "Prisoner of Azkaban" },
+                new BookInBasket { Id = 3, Title = "Prisoner of Azkaban" },
+                new BookInBasket { Id = 4, Title = "Goblet of Fire" },
+                new BookInBasket { Id = 5, Title = "Order of the Phoenix" }
+            };
+
+            //Act
+            decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
+
+            //Assert
+            /*
+              (4 * 8) - 20% [first book, second book, third book, fourth book]
++ (4 * 8) - 20% [first book, second book, third book, fifth book]
+= 25.6 * 2
+= 51.20
+             */
+            Assert.AreEqual( 51.20M, bestPriceCalculated, "Incorrect price calculated for complex discount" );
+        }
+
+
+        [TestMethod]
+        public async Task CalculateBestPrice_ExtremeShopper()
+        {
+            //Arrange
+            var systemUnderTest = CreateSystemUnderTest();
+            List<BookInBasket> testData = new List<BookInBasket> {
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 1, Title = "Philosophers Stone" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 2, Title = "Chamber of secrets" },
+                new BookInBasket { Id = 3, Title = "Prisoner of Azkaban" },
+                new BookInBasket { Id = 3, Title = "Prisoner of Azkaban" },
+                new BookInBasket { Id = 3, Title = "Prisoner of Azkaban" },
+                new BookInBasket { Id = 3, Title = "Prisoner of Azkaban" },
+                new BookInBasket { Id = 4, Title = "Goblet of Fire" },
+                new BookInBasket { Id = 4, Title = "Goblet of Fire" },
+                new BookInBasket { Id = 4, Title = "Goblet of Fire" },
+                new BookInBasket { Id = 4, Title = "Goblet of Fire" },
+                new BookInBasket { Id = 4, Title = "Goblet of Fire" },
+                new BookInBasket { Id = 5, Title = "Order of the Phoenix" },
+                new BookInBasket { Id = 5, Title = "Order of the Phoenix" },
+                new BookInBasket { Id = 5, Title = "Order of the Phoenix" },
+                new BookInBasket { Id = 5, Title = "Order of the Phoenix" }
+            };
+
+            //Act
+            decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
+
+            //Assert
+            Assert.AreEqual( 3M * (8M * 5M * 0.75M) + 2M * (8M * 4M * 0.8M), bestPriceCalculated, "Incorrect price calculated for five different books" );
+
+        }
+
+
         private PotterBusinessLogic CreateSystemUnderTest()
         {
             var systemUnderTest = new PotterBusinessLogic();

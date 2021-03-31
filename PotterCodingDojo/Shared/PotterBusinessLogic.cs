@@ -19,8 +19,17 @@ namespace PotterCodingDojo.Shared
             }
             else
             {
+                //The trick is that you have to write some code that is intelligent enough to notice that two sets of four books is cheaper than a set of five and a set of three.
+                //We need to find out how many sets of each type we have first, and THEN do the calculation
+
+
                 //We have more than 1 book in the basket
                 int totalNumberOfBooks = bookInBaskets.Count();
+                int totalNonDiscountedBooks = 0;
+                int totalUniqueSetsOfFive = 0;
+                int totalUniqueSetsOfFour = 0;
+                int totalUniqueSetsOfThree = 0;
+                int totalUniqueSetsOfTwo = 0;
                 decimal currentPrice = 0M;
                 Dictionary<int, int> bookCounters = new Dictionary<int, int>();//Id, Count of books
                 bookCounters.Add( 1, bookInBaskets.Count( t => t.Id == 1 ) );
@@ -35,6 +44,7 @@ namespace PotterCodingDojo.Shared
                 {
                     bookCountersTemp.Add( item.Key, item.Value );
                 }
+                bookCounters.Clear();
 
                 //So we have a dictionary of the only items on order.
                 if (bookCountersTemp.Count == 5)
@@ -43,7 +53,7 @@ namespace PotterCodingDojo.Shared
 
 
                     //How many unique complete sets of books do we have?
-                    int totalUniqueSetsOfFive = Math.Min( bookCountersTemp[1], Math.Min( bookCountersTemp[2], Math.Min( bookCountersTemp[3], Math.Min( bookCountersTemp[4], bookCountersTemp[5] ) ) ) );
+                    totalUniqueSetsOfFive = Math.Min( bookCountersTemp[1], Math.Min( bookCountersTemp[2], Math.Min( bookCountersTemp[3], Math.Min( bookCountersTemp[4], bookCountersTemp[5] ) ) ) );
                     //So we know the price is one complete set of 5x8x0.75
                     currentPrice = totalUniqueSetsOfFive * (5.0M * 8.0M * 0.75M);
                     bookCountersTemp[1] -= totalUniqueSetsOfFive;
@@ -59,23 +69,22 @@ namespace PotterCodingDojo.Shared
 
 
                 //Remove all empty items
-                Dictionary<int, int> bookCountersTemp2 = new Dictionary<int, int>();
                 foreach (var item in bookCountersTemp.Where( t => t.Value > 0 ))
                 {
-                    bookCountersTemp2.Add( item.Key, item.Value );
+                    bookCounters.Add( item.Key, item.Value );
                 }
 
 
                 //Deal with 4 items now
 
 
-                if (bookCountersTemp2.Count == 4)
+                if (bookCounters.Count == 4)
                 {
-                    int totalUniqueSetsOfFour = Math.Min( bookCountersTemp2.ElementAt( 0 ).Value, Math.Min( bookCountersTemp2.ElementAt( 1 ).Value, Math.Min( bookCountersTemp2.ElementAt( 2 ).Value, bookCountersTemp2.ElementAt( 3 ).Value ) ) );
+                    totalUniqueSetsOfFour = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, Math.Min( bookCounters.ElementAt( 2 ).Value, bookCounters.ElementAt( 3 ).Value ) ) );
 
                     currentPrice += totalUniqueSetsOfFour * (4.0M * 8.0M * 0.80M);
                     bookCounters.Clear();
-                    foreach (var item in bookCountersTemp2.Where( t => t.Value > 0 ))
+                    foreach (var item in bookCounters.Where( t => t.Value > 0 ))
                     {
                         bookCounters.Add( item.Key, item.Value - totalUniqueSetsOfFour );
                     }
@@ -83,21 +92,20 @@ namespace PotterCodingDojo.Shared
                 }
 
                 bookCountersTemp.Clear();
-                bookCountersTemp2.Clear();
                 //Populate the next list
                 foreach (var item in bookCounters.Where( t => t.Value > 0 ))
                 {
-                    bookCountersTemp2.Add( item.Key, item.Value );
+                    bookCountersTemp.Add( item.Key, item.Value );
                 }
 
 
-                if (bookCountersTemp2.Count == 3)
+                if (bookCountersTemp.Count == 3)
                 {
-                    int totalUniqueSetsOfThree = Math.Min( bookCountersTemp2.ElementAt( 0 ).Value, Math.Min( bookCountersTemp2.ElementAt( 1 ).Value, bookCountersTemp2.ElementAt( 2 ).Value ) );
+                    totalUniqueSetsOfThree = Math.Min( bookCountersTemp.ElementAt( 0 ).Value, Math.Min( bookCountersTemp.ElementAt( 1 ).Value, bookCountersTemp.ElementAt( 2 ).Value ) );
 
                     currentPrice += totalUniqueSetsOfThree * (3.0M * 8.0M * 0.90M);
                     bookCounters.Clear();
-                    foreach (var item in bookCountersTemp2.Where( t => t.Value > 0 ))
+                    foreach (var item in bookCountersTemp.Where( t => t.Value > 0 ))
                     {
                         bookCounters.Add( item.Key, item.Value - totalUniqueSetsOfThree );
                     }
@@ -105,19 +113,18 @@ namespace PotterCodingDojo.Shared
                 }
 
                 bookCountersTemp.Clear();
-                bookCountersTemp2.Clear();
                 //Populate the next list
                 foreach (var item in bookCounters.Where( t => t.Value > 0 ))
                 {
-                    bookCountersTemp2.Add( item.Key, item.Value );
+                    bookCountersTemp.Add( item.Key, item.Value );
                 }
-                if (bookCountersTemp2.Count == 2)
+                if (bookCountersTemp.Count == 2)
                 {
-                    int totalUniqueSetsOfTwo = Math.Min( bookCountersTemp2.ElementAt( 0 ).Value, bookCountersTemp2.ElementAt( 1 ).Value );
+                    totalUniqueSetsOfTwo = Math.Min( bookCountersTemp.ElementAt( 0 ).Value, bookCountersTemp.ElementAt( 1 ).Value );
 
                     currentPrice += totalUniqueSetsOfTwo * (2.0M * 8.0M * 0.95M);
                     bookCounters.Clear();
-                    foreach (var item in bookCountersTemp2.Where( t => t.Value > 0 ))
+                    foreach (var item in bookCountersTemp.Where( t => t.Value > 0 ))
                     {
                         bookCounters.Add( item.Key, item.Value - totalUniqueSetsOfTwo );
                     }
@@ -126,10 +133,33 @@ namespace PotterCodingDojo.Shared
 
 
                 //Now what is left?
-                currentPrice += (totalNumberOfBooks * 8.0M);
+                totalNonDiscountedBooks = totalNumberOfBooks;
 
-                return currentPrice;
+
+                decimal totalPrice =
+                    (totalUniqueSetsOfFive * (5.0M * 8.0M * 0.75M)) +
+                    (totalUniqueSetsOfFour * (4.0M * 8.0M * 0.80M)) +
+                    (totalUniqueSetsOfThree * (3.0M * 8.0M * 0.90M)) +
+                    (totalUniqueSetsOfTwo * (2.0M * 8.0M * 0.95M)) +
+                    (totalNonDiscountedBooks * 8.0M);
+
+
+                if ( totalUniqueSetsOfFive>=1 && totalUniqueSetsOfThree>=1)
+                {
+                    totalPrice =
+                    ((totalUniqueSetsOfFive-1) * (5.0M * 8.0M * 0.75M)) +
+                    ((totalUniqueSetsOfFour+2) * (4.0M * 8.0M * 0.80M)) +
+                    ((totalUniqueSetsOfThree -1)* (3.0M * 8.0M * 0.90M)) +
+                    (totalUniqueSetsOfTwo * (2.0M * 8.0M * 0.95M)) +
+                    (totalNonDiscountedBooks * 8.0M);
+                }
+
+
+
+
+                return totalPrice;
             }
+
             return decimal.MaxValue;
         }
     }
