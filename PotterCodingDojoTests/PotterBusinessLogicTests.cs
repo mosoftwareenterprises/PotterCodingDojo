@@ -111,6 +111,7 @@ namespace PotterCodingDojoTests
 
 
         [TestMethod]
+        [TestMethod]
         public async Task CalculateBestPrice_TwoSameBooks_NoDiscount()
         {
             //Arrange
