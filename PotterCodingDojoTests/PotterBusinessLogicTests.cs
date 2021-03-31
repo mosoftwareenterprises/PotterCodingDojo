@@ -20,7 +20,7 @@ Note that if you buy, say, four books, of which 3 are different titles, you get 
             List<BookInBasket> testData = new List<BookInBasket> { new BookInBasket { Id = 1, Title = "Philosophers Stone" } };
 
             //Act
-            decimal bestPriceCalculated = systemUnderTest.CalculateBestPrice( testData );
+            decimal bestPriceCalculated = await systemUnderTest.CalculateBestPrice( testData );
 
             //Assert
             Assert.AreEqual( 8.0M, bestPriceCalculated, "Incorrect price calculated for a single book" );

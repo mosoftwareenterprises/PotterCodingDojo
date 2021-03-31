@@ -1,16 +1,41 @@
 ﻿@page "/PotterDojo"
+@using PotterCodingDojo.Shared
 
 <h1>Potter Coding Dojo</h1>
 
-<p>Number of books in basked: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="() => IncrementCountBook(1)">Add book 1</button>
+<button class="btn btn-primary" @onclick="() => IncrementCountBook(2)">Add book 2</button>
+<button class="btn btn-primary" @onclick="() => IncrementCountBook(3)">Add book 3</button>
+<button class="btn btn-primary" @onclick="() => IncrementCountBook(4)">Add book 4</button>
+<button class="btn btn-primary" @onclick="() => IncrementCountBook(5)">Add book 5</button>
+
+<p>Number of book 1 in basket: @currentCountBooks[0]</p>
+<p>Number of book 2 in basket: @currentCountBooks[1]</p>
+<p>Number of book 3 in basket: @currentCountBooks[2]</p>
+<p>Number of book 4 in basket: @currentCountBooks[3]</p>
+<p>Number of book 5 in basket: @currentCountBooks[4]</p>
+
+<h2>@totalCount Books in Basket:</h2>
+@foreach(var book in bookInBaskets)
+{
+    <p>@book.Id (@book.Title)</p>
+}
+<h2>Cost of all Books: @totalPrice</h2>
 
 @code {
-    private int currentCount = 0;
+    PotterBusinessLogic potterBusinessLogic = new PotterBusinessLogic();
+    List<BookInBasket> bookInBaskets = new List<BookInBasket>();
 
-    private void IncrementCount()
+    private int[] currentCountBooks = new int[5];
+    private int totalCount = 0;
+    private decimal totalPrice = 0M;
+
+    private async Task IncrementCountBook(int id)
     {
-        currentCount++;
+        currentCountBooks[id-1]++;
+        totalCount++;
+        bookInBaskets.Add( new BookInBasket { Id = id } );
+        totalPrice = await potterBusinessLogic.CalculateBestPrice( bookInBaskets );
     }
 }

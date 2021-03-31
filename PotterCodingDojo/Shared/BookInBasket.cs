@@ -1,4 +1,4 @@
-﻿namespace PotterCodingDojoTests
+﻿namespace PotterCodingDojo.Shared
 {
     public class BookInBasket
     {
