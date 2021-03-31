@@ -21,21 +21,21 @@
 {
     <p>@book.Id (@book.Title)</p>
 }
-<h2>Cost of all Books: @totalPrice</h2>
+<h2>Cost of all Books: £@totalPrice</h2>
 
 @code {
     PotterBusinessLogic potterBusinessLogic = new PotterBusinessLogic();
     List<BookInBasket> bookInBaskets = new List<BookInBasket>();
-
     private int[] currentCountBooks = new int[5];
     private int totalCount = 0;
     private decimal totalPrice = 0M;
+    string[] bookTitles = new string[5] { "Philosophers Stone", "Chamber of secrets", "Prisoner of Azkaban", "Goblet of Fire", "Order of the Phoenix" };
 
     private async Task IncrementCountBook(int id)
     {
         currentCountBooks[id-1]++;
         totalCount++;
-        bookInBaskets.Add( new BookInBasket { Id = id } );
+        bookInBaskets.Add( new BookInBasket { Id = id, Title = bookTitles[id-1] } );
         totalPrice = await potterBusinessLogic.CalculateBestPrice( bookInBaskets );
     }
 }
