@@ -1,5 +1,6 @@
 ﻿@page "/PotterDojo"
 @using PotterCodingDojo.Shared
+@using System.Globalization
 
 <h1>Potter Coding Dojo</h1>
 
@@ -21,7 +22,7 @@
 {
     <p>@book.Id (@book.Title)</p>
 }
-<h2>Cost of all Books: £@totalPrice</h2>
+<h2>Cost of all Books: @totalPrice.ToString("C2", CultureInfo.CreateSpecificCulture("en-IE") )</h2>
 
 @code {
     PotterBusinessLogic potterBusinessLogic = new PotterBusinessLogic();
