@@ -19,62 +19,86 @@ namespace PotterCodingDojo.Shared
             }
             else
             {
-                int totalNumberOfBooks = bookInBaskets.Count();
-                int totalUniqueSetsOfOne = 0;
-                int totalUniqueSetsOfFive = 0;
-                int totalUniqueSetsOfFour = 0;
-                int totalUniqueSetsOfThree = 0;
-                int totalUniqueSetsOfTwo = 0;
-
-                Dictionary<int, int> bookCounters = new Dictionary<int, int>();//Id, Count of books
-                bookCounters.Add( 1, bookInBaskets.Count( t => t.Id == 1 ) );
-                bookCounters.Add( 2, bookInBaskets.Count( t => t.Id == 2 ) );
-                bookCounters.Add( 3, bookInBaskets.Count( t => t.Id == 3 ) );
-                bookCounters.Add( 4, bookInBaskets.Count( t => t.Id == 4 ) );
-                bookCounters.Add( 5, bookInBaskets.Count( t => t.Id == 5 ) );
-
-
-                bookCounters = RemoveEmptyCounters( bookCounters );
-                if (bookCounters.Count == 5)
-                {
-                    totalUniqueSetsOfFive = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, Math.Min( bookCounters.ElementAt( 2 ).Value, Math.Min( bookCounters.ElementAt( 3 ).Value, bookCounters.ElementAt( 4 ).Value ) ) ) );
-                    bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfFive );
-                    totalNumberOfBooks -= (totalUniqueSetsOfFive * 5);
-                }
-
-                bookCounters = RemoveEmptyCounters( bookCounters );
-                if (bookCounters.Count == 4)
-                {
-                    totalUniqueSetsOfFour = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, Math.Min( bookCounters.ElementAt( 2 ).Value, bookCounters.ElementAt( 3 ).Value ) ) );
-                    bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfFour );
-                    totalNumberOfBooks -= (totalUniqueSetsOfFour * 4);
-                }
-
-                bookCounters = RemoveEmptyCounters( bookCounters );
-                if (bookCounters.Count == 3)
-                {
-                    totalUniqueSetsOfThree = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, bookCounters.ElementAt( 2 ).Value ) );
-                    bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfThree );
-                    totalNumberOfBooks -= (totalUniqueSetsOfThree * 3);
-                }
-
-                bookCounters = RemoveEmptyCounters( bookCounters );
-                if (bookCounters.Count == 2)
-                {
-                    totalUniqueSetsOfTwo = Math.Min( bookCounters.ElementAt( 0 ).Value, bookCounters.ElementAt( 1 ).Value );
-                    bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfTwo );
-                    totalNumberOfBooks -= (totalUniqueSetsOfTwo * 2);
-                }
-
-
-                //Now what is left?
-                totalUniqueSetsOfOne = totalNumberOfBooks;
-
-                return CalculateTotal( totalUniqueSetsOfOne, totalUniqueSetsOfFive, totalUniqueSetsOfFour, totalUniqueSetsOfThree, totalUniqueSetsOfTwo );
+                return CalculateCostForMultipleBooks( bookInBaskets );
             }
         }
 
-        private decimal CalculateTotal( int totalUniqueSetsOfOne, int totalUniqueSetsOfFive, int totalUniqueSetsOfFour, int totalUniqueSetsOfThree, int totalUniqueSetsOfTwo )
+        private decimal CalculateCostForMultipleBooks( List<BookInBasket> bookInBaskets )
+        {
+            int totalNumberOfBooks = bookInBaskets.Count();
+            int totalUniqueSetsOfOne = 0;
+            int totalUniqueSetsOfFive = 0;
+            int totalUniqueSetsOfFour = 0;
+            int totalUniqueSetsOfThree = 0;
+            int totalUniqueSetsOfTwo = 0;
+
+            Dictionary<int, int> countsOfEachBookType = new Dictionary<int, int>
+            {
+                { 1, bookInBaskets.Count( t => t.Id == 1 ) },
+                { 2, bookInBaskets.Count( t => t.Id == 2 ) },
+                { 3, bookInBaskets.Count( t => t.Id == 3 ) },
+                { 4, bookInBaskets.Count( t => t.Id == 4 ) },
+                { 5, bookInBaskets.Count( t => t.Id == 5 ) }
+            };//Id, Count of books
+
+            countsOfEachBookType = RemoveEmptyCounters( countsOfEachBookType );
+            DealWithUniqueSetsOfFive( ref totalNumberOfBooks, ref totalUniqueSetsOfFive, ref countsOfEachBookType );
+
+            countsOfEachBookType = RemoveEmptyCounters( countsOfEachBookType );
+            DealWithUniqueSetsOfFour( ref totalNumberOfBooks, ref totalUniqueSetsOfFour, ref countsOfEachBookType );
+
+            countsOfEachBookType = RemoveEmptyCounters( countsOfEachBookType );
+            DealWithUniqueSetsOfThree( ref totalNumberOfBooks, ref totalUniqueSetsOfThree, ref countsOfEachBookType );
+
+            countsOfEachBookType = RemoveEmptyCounters( countsOfEachBookType );
+            DealWithUniqueSetsOfTwo( ref totalNumberOfBooks, ref totalUniqueSetsOfTwo, ref countsOfEachBookType );
+
+            totalUniqueSetsOfOne = totalNumberOfBooks;
+
+            return CalculateTotal( totalUniqueSetsOfOne, totalUniqueSetsOfTwo, totalUniqueSetsOfThree, totalUniqueSetsOfFour, totalUniqueSetsOfFive );
+        }
+
+        private void DealWithUniqueSetsOfTwo( ref int totalNumberOfBooks, ref int totalUniqueSetsOfTwo, ref Dictionary<int, int> bookCounters )
+        {
+            if (bookCounters.Count == 2)
+            {
+                totalUniqueSetsOfTwo = Math.Min( bookCounters.ElementAt( 0 ).Value, bookCounters.ElementAt( 1 ).Value );
+                bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfTwo );
+                totalNumberOfBooks -= (totalUniqueSetsOfTwo * 2);
+            }
+        }
+
+        private void DealWithUniqueSetsOfThree( ref int totalNumberOfBooks, ref int totalUniqueSetsOfThree, ref Dictionary<int, int> bookCounters )
+        {
+            if (bookCounters.Count == 3)
+            {
+                totalUniqueSetsOfThree = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, bookCounters.ElementAt( 2 ).Value ) );
+                bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfThree );
+                totalNumberOfBooks -= (totalUniqueSetsOfThree * 3);
+            }
+        }
+
+        private void DealWithUniqueSetsOfFour( ref int totalNumberOfBooks, ref int totalUniqueSetsOfFour, ref Dictionary<int, int> bookCounters )
+        {
+            if (bookCounters.Count == 4)
+            {
+                totalUniqueSetsOfFour = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, Math.Min( bookCounters.ElementAt( 2 ).Value, bookCounters.ElementAt( 3 ).Value ) ) );
+                bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfFour );
+                totalNumberOfBooks -= (totalUniqueSetsOfFour * 4);
+            }
+        }
+
+        private void DealWithUniqueSetsOfFive( ref int totalNumberOfBooks, ref int totalUniqueSetsOfFive, ref Dictionary<int, int> bookCounters )
+        {
+            if (bookCounters.Count == 5)
+            {
+                totalUniqueSetsOfFive = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, Math.Min( bookCounters.ElementAt( 2 ).Value, Math.Min( bookCounters.ElementAt( 3 ).Value, bookCounters.ElementAt( 4 ).Value ) ) ) );
+                bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfFive );
+                totalNumberOfBooks -= (totalUniqueSetsOfFive * 5);
+            }
+        }
+
+        private decimal CalculateTotal( int totalUniqueSetsOfOne, int totalUniqueSetsOfTwo, int totalUniqueSetsOfThree, int totalUniqueSetsOfFour, int totalUniqueSetsOfFive )
         {
             const decimal singleBookPrice = 8.0M;
             const decimal discountFor5BooksOfSet = 0.75M;
@@ -105,12 +129,12 @@ namespace PotterCodingDojo.Shared
             return totalPrice;
         }
 
-        private Dictionary<int, int> ReduceCounters( Dictionary<int, int> bookCounters, int totalUniqueSetsOfFive )
+        private Dictionary<int, int> ReduceCounters( Dictionary<int, int> listToRemoveItemsFrom, int numberOfItemsToRemove )
         {
             Dictionary<int, int> reducedList = new Dictionary<int, int>();
-            foreach (var item in bookCounters)
+            foreach (var item in listToRemoveItemsFrom)
             {
-                reducedList.Add( item.Key, item.Value - totalUniqueSetsOfFive );
+                reducedList.Add( item.Key, item.Value - numberOfItemsToRemove );
             }
             return reducedList;
         }
