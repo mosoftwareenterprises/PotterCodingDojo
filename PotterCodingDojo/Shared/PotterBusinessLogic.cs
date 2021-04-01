@@ -19,13 +19,8 @@ namespace PotterCodingDojo.Shared
             }
             else
             {
-                //The trick is that you have to write some code that is intelligent enough to notice that two sets of four books is cheaper than a set of five and a set of three.
-                //We need to find out how many sets of each type we have first, and THEN do the calculation
-
-
-                //We have more than 1 book in the basket
                 int totalNumberOfBooks = bookInBaskets.Count();
-                int totalNonDiscountedBooks = 0;
+                int totalUniqueSetsOfOne = 0;
                 int totalUniqueSetsOfFive = 0;
                 int totalUniqueSetsOfFour = 0;
                 int totalUniqueSetsOfThree = 0;
@@ -38,24 +33,16 @@ namespace PotterCodingDojo.Shared
                 bookCounters.Add( 4, bookInBaskets.Count( t => t.Id == 4 ) );
                 bookCounters.Add( 5, bookInBaskets.Count( t => t.Id == 5 ) );
 
-                //Remove all empty items
-                bookCounters = RemoveEmptyCounters( bookCounters );
 
-                //So we have a dictionary of the only items on order.
+                bookCounters = RemoveEmptyCounters( bookCounters );
                 if (bookCounters.Count == 5)
                 {
-                    //How many unique complete sets of books do we have?
-                    totalUniqueSetsOfFive = Math.Min( bookCounters[1], Math.Min( bookCounters[2], Math.Min( bookCounters[3], Math.Min( bookCounters[4], bookCounters[5] ) ) ) );
-
+                    totalUniqueSetsOfFive = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, Math.Min( bookCounters.ElementAt( 2 ).Value, Math.Min( bookCounters.ElementAt( 3 ).Value, bookCounters.ElementAt( 4 ).Value ) ) ) );
                     bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfFive );
-
-                    //So we have potential incomplete sets now
                     totalNumberOfBooks -= (totalUniqueSetsOfFive * 5);
                 }
 
                 bookCounters = RemoveEmptyCounters( bookCounters );
-
-
                 if (bookCounters.Count == 4)
                 {
                     totalUniqueSetsOfFour = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, Math.Min( bookCounters.ElementAt( 2 ).Value, bookCounters.ElementAt( 3 ).Value ) ) );
@@ -64,7 +51,6 @@ namespace PotterCodingDojo.Shared
                 }
 
                 bookCounters = RemoveEmptyCounters( bookCounters );
-
                 if (bookCounters.Count == 3)
                 {
                     totalUniqueSetsOfThree = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, bookCounters.ElementAt( 2 ).Value ) );
@@ -73,7 +59,6 @@ namespace PotterCodingDojo.Shared
                 }
 
                 bookCounters = RemoveEmptyCounters( bookCounters );
-
                 if (bookCounters.Count == 2)
                 {
                     totalUniqueSetsOfTwo = Math.Min( bookCounters.ElementAt( 0 ).Value, bookCounters.ElementAt( 1 ).Value );
@@ -83,32 +68,43 @@ namespace PotterCodingDojo.Shared
 
 
                 //Now what is left?
-                totalNonDiscountedBooks = totalNumberOfBooks;
+                totalUniqueSetsOfOne = totalNumberOfBooks;
 
-
-                decimal totalPrice =
-                    (totalUniqueSetsOfFive * (5.0M * 8.0M * 0.75M)) +
-                    (totalUniqueSetsOfFour * (4.0M * 8.0M * 0.80M)) +
-                    (totalUniqueSetsOfThree * (3.0M * 8.0M * 0.90M)) +
-                    (totalUniqueSetsOfTwo * (2.0M * 8.0M * 0.95M)) +
-                    (totalNonDiscountedBooks * 8.0M);
-
-
-                if (totalUniqueSetsOfFive >= 1 && totalUniqueSetsOfThree >= 1)
-                {
-                    totalPrice =
-                    ((totalUniqueSetsOfFive - 1) * (5.0M * 8.0M * 0.75M)) +
-                    ((totalUniqueSetsOfFour + 2) * (4.0M * 8.0M * 0.80M)) +
-                    ((totalUniqueSetsOfThree - 1) * (3.0M * 8.0M * 0.90M)) +
-                    (totalUniqueSetsOfTwo * (2.0M * 8.0M * 0.95M)) +
-                    (totalNonDiscountedBooks * 8.0M);
-                }
-
-
-                return totalPrice;
+                return CalculateTotal( totalUniqueSetsOfOne, totalUniqueSetsOfFive, totalUniqueSetsOfFour, totalUniqueSetsOfThree, totalUniqueSetsOfTwo );
             }
 
             return decimal.MaxValue;
+        }
+
+        private decimal CalculateTotal( int totalUniqueSetsOfOne, int totalUniqueSetsOfFive, int totalUniqueSetsOfFour, int totalUniqueSetsOfThree, int totalUniqueSetsOfTwo )
+        {
+            const decimal singleBookPrice = 8.0M;
+            const decimal discountFor5BooksOfSet = 0.75M;
+            const decimal discountFor4BooksOfSet = 0.80M;
+            const decimal discountFor3BooksOfSet = 0.90M;
+            const decimal discountFor2BooksOfSet = 0.95M;
+            const decimal discountFor1BookOfSet = 1.0M;
+            decimal totalPrice =
+                (totalUniqueSetsOfFive * (5.0M * singleBookPrice * discountFor5BooksOfSet)) +
+                (totalUniqueSetsOfFour * (4.0M * singleBookPrice * discountFor4BooksOfSet)) +
+                (totalUniqueSetsOfThree * (3.0M * singleBookPrice * discountFor3BooksOfSet)) +
+                (totalUniqueSetsOfTwo * (2.0M * singleBookPrice * discountFor2BooksOfSet)) +
+                (totalUniqueSetsOfOne * (1.0M * singleBookPrice * discountFor1BookOfSet));
+
+
+            //We need to optimise here as its cheaper to buy 2 sets of 4 rather than a 5 and a 3 together!
+            if (totalUniqueSetsOfFive >= 1 && totalUniqueSetsOfThree >= 1)
+            {
+                totalPrice =
+                ((totalUniqueSetsOfFive - 1) * (5.0M * singleBookPrice * discountFor5BooksOfSet)) +
+                ((totalUniqueSetsOfFour + 2) * (4.0M * singleBookPrice * discountFor4BooksOfSet)) +
+                ((totalUniqueSetsOfThree - 1) * (3.0M * singleBookPrice * discountFor3BooksOfSet)) +
+                (totalUniqueSetsOfTwo * (2.0M * singleBookPrice * discountFor2BooksOfSet)) +
+                (totalUniqueSetsOfOne * (1.0M * singleBookPrice * discountFor1BookOfSet));
+            }
+
+
+            return totalPrice;
         }
 
         private Dictionary<int, int> ReduceCounters( Dictionary<int, int> bookCounters, int totalUniqueSetsOfFive )
