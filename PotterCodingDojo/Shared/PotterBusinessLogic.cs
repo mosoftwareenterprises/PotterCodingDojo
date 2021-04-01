@@ -72,8 +72,6 @@ namespace PotterCodingDojo.Shared
 
                 return CalculateTotal( totalUniqueSetsOfOne, totalUniqueSetsOfFive, totalUniqueSetsOfFour, totalUniqueSetsOfThree, totalUniqueSetsOfTwo );
             }
-
-            return decimal.MaxValue;
         }
 
         private decimal CalculateTotal( int totalUniqueSetsOfOne, int totalUniqueSetsOfFive, int totalUniqueSetsOfFour, int totalUniqueSetsOfThree, int totalUniqueSetsOfTwo )
@@ -117,7 +115,7 @@ namespace PotterCodingDojo.Shared
             return reducedList;
         }
 
-        private static Dictionary<int, int> RemoveEmptyCounters( Dictionary<int, int> listContainingItemsToRemove )
+        private Dictionary<int, int> RemoveEmptyCounters( Dictionary<int, int> listContainingItemsToRemove )
         {
             Dictionary<int, int> sanitisedList = new Dictionary<int, int>();
             foreach (var item in listContainingItemsToRemove.Where( t => t.Value > 0 ))
