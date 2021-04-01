@@ -150,7 +150,7 @@ namespace PotterCodingDojoTests
         }
 
         [TestMethod]
-        public async Task CalculateBestPrice_FiveBooks_TwoDiffDiscounts()
+        public async Task CalculateBestPrice_SixBooks_TwoDiffDiscounts()
         {
             //Arrange
             var systemUnderTest = CreateSystemUnderTest();

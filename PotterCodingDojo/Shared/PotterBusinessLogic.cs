@@ -30,7 +30,7 @@ namespace PotterCodingDojo.Shared
                 int totalUniqueSetsOfFour = 0;
                 int totalUniqueSetsOfThree = 0;
                 int totalUniqueSetsOfTwo = 0;
-                decimal currentPrice = 0M;
+
                 Dictionary<int, int> bookCounters = new Dictionary<int, int>();//Id, Count of books
                 bookCounters.Add( 1, bookInBaskets.Count( t => t.Id == 1 ) );
                 bookCounters.Add( 2, bookInBaskets.Count( t => t.Id == 2 ) );
@@ -39,95 +39,45 @@ namespace PotterCodingDojo.Shared
                 bookCounters.Add( 5, bookInBaskets.Count( t => t.Id == 5 ) );
 
                 //Remove all empty items
-                Dictionary<int, int> bookCountersTemp = new Dictionary<int, int>();
-                foreach (var item in bookCounters.Where( t => t.Value > 0 ))
-                {
-                    bookCountersTemp.Add( item.Key, item.Value );
-                }
-                bookCounters.Clear();
+                bookCounters = RemoveEmptyCounters( bookCounters );
 
                 //So we have a dictionary of the only items on order.
-                if (bookCountersTemp.Count == 5)
+                if (bookCounters.Count == 5)
                 {
-                    //We have a complete set, so lets find it.
-
-
                     //How many unique complete sets of books do we have?
-                    totalUniqueSetsOfFive = Math.Min( bookCountersTemp[1], Math.Min( bookCountersTemp[2], Math.Min( bookCountersTemp[3], Math.Min( bookCountersTemp[4], bookCountersTemp[5] ) ) ) );
-                    //So we know the price is one complete set of 5x8x0.75
-                    currentPrice = totalUniqueSetsOfFive * (5.0M * 8.0M * 0.75M);
-                    bookCountersTemp[1] -= totalUniqueSetsOfFive;
-                    bookCountersTemp[2] -= totalUniqueSetsOfFive;
-                    bookCountersTemp[3] -= totalUniqueSetsOfFive;
-                    bookCountersTemp[4] -= totalUniqueSetsOfFive;
-                    bookCountersTemp[5] -= totalUniqueSetsOfFive;
+                    totalUniqueSetsOfFive = Math.Min( bookCounters[1], Math.Min( bookCounters[2], Math.Min( bookCounters[3], Math.Min( bookCounters[4], bookCounters[5] ) ) ) );
+
+                    bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfFive );
 
                     //So we have potential incomplete sets now
                     totalNumberOfBooks -= (totalUniqueSetsOfFive * 5);
                 }
 
-
-
-                //Remove all empty items
-                foreach (var item in bookCountersTemp.Where( t => t.Value > 0 ))
-                {
-                    bookCounters.Add( item.Key, item.Value );
-                }
-
-
-                //Deal with 4 items now
+                bookCounters = RemoveEmptyCounters( bookCounters );
 
 
                 if (bookCounters.Count == 4)
                 {
                     totalUniqueSetsOfFour = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, Math.Min( bookCounters.ElementAt( 2 ).Value, bookCounters.ElementAt( 3 ).Value ) ) );
-
-                    currentPrice += totalUniqueSetsOfFour * (4.0M * 8.0M * 0.80M);
-                    bookCounters.Clear();
-                    foreach (var item in bookCounters.Where( t => t.Value > 0 ))
-                    {
-                        bookCounters.Add( item.Key, item.Value - totalUniqueSetsOfFour );
-                    }
+                    bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfFour );
                     totalNumberOfBooks -= (totalUniqueSetsOfFour * 4);
                 }
 
-                bookCountersTemp.Clear();
-                //Populate the next list
-                foreach (var item in bookCounters.Where( t => t.Value > 0 ))
+                bookCounters = RemoveEmptyCounters( bookCounters );
+
+                if (bookCounters.Count == 3)
                 {
-                    bookCountersTemp.Add( item.Key, item.Value );
-                }
-
-
-                if (bookCountersTemp.Count == 3)
-                {
-                    totalUniqueSetsOfThree = Math.Min( bookCountersTemp.ElementAt( 0 ).Value, Math.Min( bookCountersTemp.ElementAt( 1 ).Value, bookCountersTemp.ElementAt( 2 ).Value ) );
-
-                    currentPrice += totalUniqueSetsOfThree * (3.0M * 8.0M * 0.90M);
-                    bookCounters.Clear();
-                    foreach (var item in bookCountersTemp.Where( t => t.Value > 0 ))
-                    {
-                        bookCounters.Add( item.Key, item.Value - totalUniqueSetsOfThree );
-                    }
+                    totalUniqueSetsOfThree = Math.Min( bookCounters.ElementAt( 0 ).Value, Math.Min( bookCounters.ElementAt( 1 ).Value, bookCounters.ElementAt( 2 ).Value ) );
+                    bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfThree );
                     totalNumberOfBooks -= (totalUniqueSetsOfThree * 3);
                 }
 
-                bookCountersTemp.Clear();
-                //Populate the next list
-                foreach (var item in bookCounters.Where( t => t.Value > 0 ))
-                {
-                    bookCountersTemp.Add( item.Key, item.Value );
-                }
-                if (bookCountersTemp.Count == 2)
-                {
-                    totalUniqueSetsOfTwo = Math.Min( bookCountersTemp.ElementAt( 0 ).Value, bookCountersTemp.ElementAt( 1 ).Value );
+                bookCounters = RemoveEmptyCounters( bookCounters );
 
-                    currentPrice += totalUniqueSetsOfTwo * (2.0M * 8.0M * 0.95M);
-                    bookCounters.Clear();
-                    foreach (var item in bookCountersTemp.Where( t => t.Value > 0 ))
-                    {
-                        bookCounters.Add( item.Key, item.Value - totalUniqueSetsOfTwo );
-                    }
+                if (bookCounters.Count == 2)
+                {
+                    totalUniqueSetsOfTwo = Math.Min( bookCounters.ElementAt( 0 ).Value, bookCounters.ElementAt( 1 ).Value );
+                    bookCounters = ReduceCounters( bookCounters, totalUniqueSetsOfTwo );
                     totalNumberOfBooks -= (totalUniqueSetsOfTwo * 2);
                 }
 
@@ -144,23 +94,41 @@ namespace PotterCodingDojo.Shared
                     (totalNonDiscountedBooks * 8.0M);
 
 
-                if ( totalUniqueSetsOfFive>=1 && totalUniqueSetsOfThree>=1)
+                if (totalUniqueSetsOfFive >= 1 && totalUniqueSetsOfThree >= 1)
                 {
                     totalPrice =
-                    ((totalUniqueSetsOfFive-1) * (5.0M * 8.0M * 0.75M)) +
-                    ((totalUniqueSetsOfFour+2) * (4.0M * 8.0M * 0.80M)) +
-                    ((totalUniqueSetsOfThree -1)* (3.0M * 8.0M * 0.90M)) +
+                    ((totalUniqueSetsOfFive - 1) * (5.0M * 8.0M * 0.75M)) +
+                    ((totalUniqueSetsOfFour + 2) * (4.0M * 8.0M * 0.80M)) +
+                    ((totalUniqueSetsOfThree - 1) * (3.0M * 8.0M * 0.90M)) +
                     (totalUniqueSetsOfTwo * (2.0M * 8.0M * 0.95M)) +
                     (totalNonDiscountedBooks * 8.0M);
                 }
-
-
 
 
                 return totalPrice;
             }
 
             return decimal.MaxValue;
+        }
+
+        private Dictionary<int, int> ReduceCounters( Dictionary<int, int> bookCounters, int totalUniqueSetsOfFive )
+        {
+            Dictionary<int, int> reducedList = new Dictionary<int, int>();
+            foreach (var item in bookCounters)
+            {
+                reducedList.Add( item.Key, item.Value - totalUniqueSetsOfFive );
+            }
+            return reducedList;
+        }
+
+        private static Dictionary<int, int> RemoveEmptyCounters( Dictionary<int, int> listContainingItemsToRemove )
+        {
+            Dictionary<int, int> sanitisedList = new Dictionary<int, int>();
+            foreach (var item in listContainingItemsToRemove.Where( t => t.Value > 0 ))
+            {
+                sanitisedList.Add( item.Key, item.Value );
+            }
+            return sanitisedList;
         }
     }
 }
